@@ -1,0 +1,62 @@
+--- dxr2-driver/ChangeLog	2002-03-16 01:19:59.000000000 +0100
++++ dxr2driver/ChangeLog	2002-03-25 02:57:22.000000000 +0100
+@@ -1,3 +1,13 @@
++2002-03-24 Scott Bucholtz <linuxman@linuxmanland.com>
++	* Applied Tobias Diedrich's <ranma@gmx.at> latest subtitles patch which
++	  takes care of some weird color palettes which were showing up in the
++	  subtitles.
++
++
++2002-03-19 Scott Bucholtz <linuxman@linuxmanland.com>
++	* Released dxr2-driver-1.0.4.
++
++
+ 2002-03-15 Scott Bucholtz <linuxman@linuxmanland.com>
+ 	* Added Tobias Diedrich's <ranma@gmx.at> new subtitles patch
+ 	  which is much easier than the old ones because of the utilization
+--- dxr2-driver/player/dvd_controls.c	2002-03-16 01:18:36.000000000 +0100
++++ dxr2driver/player/dvd_controls.c	2002-03-25 02:54:36.000000000 +0100
+@@ -33,6 +33,7 @@
+ #include "dvd_controls.h"
+ #include "multifile.h"
+ #include <stdio.h>
++#include <dxr2ioctl.h>
+ 
+ #define min(x,y) (x < y ? x : y)
+ 
+@@ -264,6 +265,8 @@
+ 
+ int dvd_setup(dvd_controls *con, char *file_name)
+ {
++  dxr2_palette_t	pal;
++  int i;
+   if (!con->dvd && !(con->dvd=DVDOpen(file_name)))
+     return 0;
+   
+@@ -317,9 +320,12 @@
+   con->cur_pgc = con->vts_file->vts_pgcit->pgci_srp[con->pgc_id - 1].pgc;
+   con->next_cell = con->cur_pgc->program_map[con->pgn - 1] - 1;
+ 
+-  /*  This next line is for the subtitles  */
+-  dxr2_set_subpicture_palettes(con->vmg_file->first_play_pgc->palette);
+-  
++  /*  This is for the subtitles  */
++  for (i=0; i<16; i++) {
++  	pal.entries[i]=con->vts_file->vts_pgcit->pgci_srp->pgc->palette[i];
++  }
++  dxr2_set_subpicture_palette(pal);
++
+   /*
+    * We've got enough info, time to open the title set data.
+    */
+--- dxr2-driver/player/dxr2-api.c	2002-03-16 01:20:27.000000000 +0100
++++ dxr2driver/player/dxr2-api.c	2002-03-25 02:59:44.000000000 +0100
+@@ -205,7 +205,7 @@
+ }
+ 
+ /*  This should do the subtitles correctly  */
+-int dxr2_set_subpicture_palettes(dxr2_palette_t pal)
++int dxr2_set_subpicture_palette(dxr2_palette_t pal)
+ {
+   return dxr2FD<0 ? -1 : ioctl(dxr2FD, DXR2_IOC_SET_SUBPICTURE_PALETTE, &pal);
+ }
