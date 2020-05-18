@@ -3,7 +3,7 @@ Summary:	Linux drivers for Creative Labs DXR2 devices
 Summary(pl.UTF-8):	Sterowniki linuksowe do urządzeń Creative Labs DXR2
 Name:		dxr2-driver
 Version:	1.0.4
-Release:	3
+Release:	4
 License:	GPL v2+
 Group:		Libraries
 Source0:	http://downloads.sourceforge.net/dxr2/%{name}-%{version}.tar.gz
